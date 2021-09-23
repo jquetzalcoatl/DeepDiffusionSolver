@@ -1,3 +1,1 @@
-# DiffSolverModels
-# DeepDiffusionSolver
 # DeepDiffusionSolver
