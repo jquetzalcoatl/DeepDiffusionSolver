@@ -143,7 +143,7 @@ class generateDatasets(object):
 		plt.show()
 
 class inOut(object):
-	def save_model(self, model, module, optimizer, loss, loss_test, epoch, dir, tag = 'backup'):
+	def save_model(self, PATH, dict, model, module, optimizer, loss, loss_test, epoch, dir, tag = 'backup'):
 		# global PATH
 		os.path.isdir(PATH + "Models/") or os.mkdir(PATH + "Models/")
 		# date = datetime.now().__str__()

@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import torchvision.utils as vutils
+import os
 
 class myPlots():
 	def clasPlots(self, error_list, acc, accTrain, epoch):
@@ -11,7 +13,7 @@ class myPlots():
 		ax2.set(xlabel='epochs', ylabel='%', title="Accuracy")
 		plt.show()
 
-	def plotDiff(self, error_list, error_list_test, testloader, diff, epoch):
+	def plotDiff(self, PATH, dir, device, error_list, error_list_test, testloader, diff, epoch):
 		(x, y) = next(iter(testloader))
 		# y = next(iter(testloader))[1]
 		yhat = diff(x.to(device))
