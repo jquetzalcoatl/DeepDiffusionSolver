@@ -166,7 +166,7 @@ class inOut(object):
 		dict["LossTest"] = loss_test
 		self.saveDict(dict)
 
-	def load_model(self, module, dict):
+	def load_model(self, net, module, dict):
 		if module == "Class":
 			model = MLP().to(device)
 			checkpoint = torch.load(dict[module][-1])
@@ -176,7 +176,7 @@ class inOut(object):
 			loss = checkpoint['loss']
 			return last_epoch, loss, model
 		elif module == "Diff":
-			model = DiffSur().to(device)
+			model = net #DiffSur().to(device)
 			checkpoint = torch.load(dict[module][-1])
 			model.load_state_dict(checkpoint['model_state_dict'])
 			# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
