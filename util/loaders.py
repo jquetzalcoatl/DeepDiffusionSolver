@@ -161,7 +161,6 @@ class inOut(object):
 			dict[module].append(filename)
 		else:
 			dict[module][-1] = filename
-		dict[module].append(filename)
 		dict["Loss"] = loss
 		dict["LossTest"] = loss_test
 		self.saveDict(dict)

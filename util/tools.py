@@ -3,11 +3,11 @@ import torch.nn as nn
 from loaders import generateDatasets
 
 class tools(object):
-    def errorPerDataset(self, PATH, theModel, device, batch_size=50, num_workers=0, std_tr=0.0, s=512):
-        self.datasetNameList = [f'{i}SourcesRdm' for i in range(1,20)]
-        self.errPerDS = [0 for i in range(1,20)]
+    def errorPerDataset(self, PATH, theModel, device, BATCH_SIZE=50, NUM_WORKERS=0, std_tr=0.0, s=512):
+        self.datasetNameList = [f'{i}SourcesRdm' for i in range(1,21)]
+        self.errPerDS = [0 for i in range(1,21)]
         for (j, ds) in enumerate(self.datasetNameList):
-            trainloader, testloader = generateDatasets(PATH, datasetName=ds, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, std_tr=0.0, s=512).getDataLoaders()
+            trainloader, testloader = generateDatasets(PATH, datasetName=ds, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, std_tr=std_tr, s=s).getDataLoaders()
             with torch.no_grad():
                 erSum = 0
                 for (i, data) in enumerate(testloader):
