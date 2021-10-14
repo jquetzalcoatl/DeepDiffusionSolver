@@ -49,7 +49,7 @@ class MyData(Dataset):
 
 	def load_image(self, file_name, add_noise=True):
 		if self.transformation == "linear":
-				x = np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s)
+				x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s))
 		elif self.transformation == "sqrt":
 				x = np.sqrt(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s)))
 		if add_noise:
