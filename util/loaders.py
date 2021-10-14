@@ -10,10 +10,11 @@ import torchvision.transforms as transforms
 import torch
 
 class MyData(Dataset):
-	def __init__(self, PATH, df, datasetName="5SourcesRdm", dset = "test", std=0.25, s=512):
+	def __init__(self, PATH, df, datasetName="5SourcesRdm", dset = "test", std=0.25, s=512, transformation="linear"):
 		self.s = s
 		self.df = df
 		self.datasetName = datasetName
+		self.transformation = transformation
 		if datasetName == "All":
 			self.path = os.path.join(PATH, dset)
 		elif datasetName == "AllSub":
@@ -47,7 +48,10 @@ class MyData(Dataset):
 		return image, label
 
 	def load_image(self, file_name, add_noise=True):
-		x = np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s)
+		if self.transformation == "linear":
+				x = np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s)
+		elif self.transformation == "sqrt":
+				x = np.sqrt(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s)))
 		if add_noise:
 				image = self.t(x)
 		else:
@@ -66,7 +70,7 @@ class AddGaussianNoise(object):
 		return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
 class generateDatasets(object):
-	def __init__(self, PATH, datasetName = "TwoSourcesRdm", batch_size=40, num_workers=8, std_tr=0.0, s=512):
+	def __init__(self, PATH, datasetName = "TwoSourcesRdm", batch_size=40, num_workers=8, std_tr=0.0, s=512, transformation="linear"):
 		self.bsize = batch_size
 		self.nworkers = num_workers
 		if datasetName != "All" and datasetName != "AllSub":
@@ -78,8 +82,8 @@ class generateDatasets(object):
 		else:
 			self.df_test = pd.read_csv(os.path.join(PATH) + "/test.csv")
 			self.df_train = pd.read_csv(os.path.join(PATH) + "/train.csv")
-		self.test = MyData(PATH, self.df_test, datasetName=datasetName, dset="test", std=0.0, s=s)
-		self.train = MyData(PATH, self.df_train, datasetName=datasetName, dset="train",std= std_tr, s=s)
+		self.test = MyData(PATH, self.df_test, datasetName=datasetName, dset="test", std=0.0, s=s, transformation=transformation)
+		self.train = MyData(PATH, self.df_train, datasetName=datasetName, dset="train",std= std_tr, s=s, transformation=transformation)
 
 	def outputDatasets(self, typeSet = "test"):
 		if typeSet == "test":
