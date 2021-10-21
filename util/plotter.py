@@ -13,10 +13,13 @@ class myPlots():
         ax2.set(xlabel='epochs', ylabel='%', title="Accuracy")
         plt.show()
 
-    def plotDiff(self, PATH, dir, device, error_list, error_list_test, testloader, diff, epoch):
+    def plotDiff(self, PATH, dir, device, error_list, error_list_test, testloader, diff, epoch, transformation="linear"):
         (x, y) = next(iter(testloader))
         # y = next(iter(testloader))[1]
         yhat = diff(x.to(device))
+        if transformation == "sqrt":
+            yhat = yhat.pow(2)
+            y = y.pow(2)
         # fig, axs = plt.subplots(2, 2)
         # axs[0, 0].plot(error_list, 'b*-', lw=3, ms=12)
         # axs[0,0].set(ylabel='Loss', title='Epoch {}'.format(epoch+1))
