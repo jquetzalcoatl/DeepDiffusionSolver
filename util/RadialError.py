@@ -1,12 +1,6 @@
-import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import torch
-import torchvision.transforms as transforms
-from torch.utils.data import Dataset
-import PIL
+
 
 
 def fetch_dataset_name(idx):
@@ -175,6 +169,8 @@ def get_radial_differences(src_img, target_img, pred_img):
 
 if __name__ == '__main__':
     from loaders import generateDatasets
+    import torch
+    import matplotlib.pyplot as plt
     PATH = r'D:\Google Drive IU\phdStuff\AI-project-with-javier\diffusion project'
     device = torch.device("cpu")
     
