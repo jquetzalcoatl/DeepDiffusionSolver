@@ -16,125 +16,126 @@ import PIL
 # import scipy
 # from PIL import Image
 
-class generateDatasets(object):
-    def __init__(self, PATH, datasetName = "TwoSourcesRdm", batch_size=40, num_workers=8, std_tr=0.25, s=512):
-        self.bsize = batch_size
-        self.nworkers = num_workers
-        self.df_test = pd.read_csv(os.path.join(PATH, datasetName) + "/test.csv")
-        self.df_train = pd.read_csv(os.path.join(PATH, datasetName) + "/train.csv")
-        self.test = MyData(self.df_test, PATH, datasetName=datasetName, dset="test", std=0.0, s=s)
-        self.train = MyData(self.df_train, PATH, datasetName=datasetName, dset="train",std= std_tr, s=s)
 
-    def outputDatasets(self, typeSet = "test"):
-        if typeSet == "test":
-            return self.test, self.df_test
-        elif typeSet == "train":
-            return self.train, self.df_train
+# class generateDatasets(object):
+#     def __init__(self, PATH, datasetName = "TwoSourcesRdm", batch_size=40, num_workers=8, std_tr=0.25, s=512):
+#         self.bsize = batch_size
+#         self.nworkers = num_workers
+#         self.df_test = pd.read_csv(os.path.join(PATH, datasetName) + "/test.csv")
+#         self.df_train = pd.read_csv(os.path.join(PATH, datasetName) + "/train.csv")
+#         self.test = MyData(self.df_test, PATH, datasetName=datasetName, dset="test", std=0.0, s=s)
+#         self.train = MyData(self.df_train, PATH, datasetName=datasetName, dset="train",std= std_tr, s=s)
 
-    def getWeights(self):
-        wTest = np.zeros(self.df_test.Label.unique().size)
-        for i in range(self.df_test.Label.size):
-            wTest[int(self.df_test.Label[i])-1] += 1
-        wTrain = np.zeros(self.df_train.Label.unique().size)
-        for i in range(self.df_train.Label.size):
-            wTrain[int(self.df_train.Label[i])-1] += 1
-        if np.prod(wTest == self.df_test.Label.size/len(wTest)):
-            print("Labels are balanced in test set")
-        if np.prod(wTrain == self.df_train.Label.size/len(wTrain)):
-            print("Labels are balanced in train set")
-        return wTest, wTrain
+#     def outputDatasets(self, typeSet = "test"):
+#         if typeSet == "test":
+#             return self.test, self.df_test
+#         elif typeSet == "train":
+#             return self.train, self.df_train
 
-    def getDataLoaders(self):
-        trainloader = torch.utils.data.DataLoader(self.train, batch_size=self.bsize,
-                    shuffle=True, num_workers=self.nworkers)
-        testloader = torch.utils.data.DataLoader(self.test, batch_size=self.bsize,
-                    shuffle=True, num_workers=self.nworkers)
-        return trainloader, testloader
+#     def getWeights(self):
+#         wTest = np.zeros(self.df_test.Label.unique().size)
+#         for i in range(self.df_test.Label.size):
+#             wTest[int(self.df_test.Label[i])-1] += 1
+#         wTrain = np.zeros(self.df_train.Label.unique().size)
+#         for i in range(self.df_train.Label.size):
+#             wTrain[int(self.df_train.Label[i])-1] += 1
+#         if np.prod(wTest == self.df_test.Label.size/len(wTest)):
+#             print("Labels are balanced in test set")
+#         if np.prod(wTrain == self.df_train.Label.size/len(wTrain)):
+#             print("Labels are balanced in train set")
+#         return wTest, wTrain
 
-    def spinVsTemp(self):
-        meanSpin_Te = np.zeros(10)
-        Temp_Te = np.zeros(10)
-        meanSpin_Tr = np.zeros(10)
-        Temp_Tr = np.zeros(10)
-        jj = 10
-        ii_Te = int(self.test.__len__()/jj)
-        ii_Tr = int(self.train.__len__()/jj)
-        for j in range(jj):
-            ms = 0
-            mT = 0
-            for i in range(ii_Te):
-                ms += self.test[j*ii_Te + i][0].mean().item()
-                mT += self.test[j*ii_Te + i][1].item()
-            meanSpin_Te[j] = ms/ii_Te
-            Temp_Te[j] = mT/ii_Te
+#     def getDataLoaders(self):
+#         trainloader = torch.utils.data.DataLoader(self.train, batch_size=self.bsize,
+#                     shuffle=True, num_workers=self.nworkers)
+#         testloader = torch.utils.data.DataLoader(self.test, batch_size=self.bsize,
+#                     shuffle=True, num_workers=self.nworkers)
+#         return trainloader, testloader
 
-            ms = 0
-            mT = 0
-            for i in range(ii_Tr):
-                ms += self.train[j*ii_Tr + i][0].mean().item()
-                mT += self.train[j*ii_Tr + i][1].item()
-            meanSpin_Tr[j] = ms/ii_Tr
-            Temp_Tr[j] = mT/ii_Tr
+#     def spinVsTemp(self):
+#         meanSpin_Te = np.zeros(10)
+#         Temp_Te = np.zeros(10)
+#         meanSpin_Tr = np.zeros(10)
+#         Temp_Tr = np.zeros(10)
+#         jj = 10
+#         ii_Te = int(self.test.__len__()/jj)
+#         ii_Tr = int(self.train.__len__()/jj)
+#         for j in range(jj):
+#             ms = 0
+#             mT = 0
+#             for i in range(ii_Te):
+#                 ms += self.test[j*ii_Te + i][0].mean().item()
+#                 mT += self.test[j*ii_Te + i][1].item()
+#             meanSpin_Te[j] = ms/ii_Te
+#             Temp_Te[j] = mT/ii_Te
 
-        T_Te = Temp_Te/10 + 1.8
-        T_Tr = Temp_Tr/10 + 1.8
-        plt.plot(T_Te, meanSpin_Te)
-        plt.legend("Test")
-        plt.xlabel("Temp")
-        plt.ylabel("Mean Spin")
-        plt.plot(T_Tr, meanSpin_Tr)
-        plt.legend("Training")
-        plt.show()
+#             ms = 0
+#             mT = 0
+#             for i in range(ii_Tr):
+#                 ms += self.train[j*ii_Tr + i][0].mean().item()
+#                 mT += self.train[j*ii_Tr + i][1].item()
+#             meanSpin_Tr[j] = ms/ii_Tr
+#             Temp_Tr[j] = mT/ii_Tr
 
-class MyData(Dataset):
-    def __init__(self, df, PATH, datasetName="TwoSourcesRdm", dset = "test", std=0.25, s=512):
-        self.s = s
-        self.df = df
-        self.path = os.path.join(PATH, datasetName, dset)
-        self.t_noise = transforms.Compose([
-                               transforms.ToPILImage(),
-                               transforms.Resize(s, interpolation=PIL.Image.NEAREST),
-                               transforms.ToTensor(),
-                               AddGaussianNoise(0., std),
-                               ])
-        self.t = transforms.Compose([
-                               transforms.ToPILImage(),
-                               transforms.Resize(s, interpolation=PIL.Image.NEAREST),
-                               transforms.ToTensor(),
-                               #AddGaussianNoise(0., std),
-                               ])
-        self.fileNames = os.listdir(self.path)
-        self.fileNames.sort()
+#         T_Te = Temp_Te/10 + 1.8
+#         T_Tr = Temp_Tr/10 + 1.8
+#         plt.plot(T_Te, meanSpin_Te)
+#         plt.legend("Test")
+#         plt.xlabel("Temp")
+#         plt.ylabel("Mean Spin")
+#         plt.plot(T_Tr, meanSpin_Tr)
+#         plt.legend("Training")
+#         plt.show()
 
-    def __len__(self):
-        return self.df.shape[0]
+# class MyData(Dataset):
+#     def __init__(self, df, PATH, datasetName="TwoSourcesRdm", dset = "test", std=0.25, s=512):
+#         self.s = s
+#         self.df = df
+#         self.path = os.path.join(PATH, datasetName, dset)
+#         self.t_noise = transforms.Compose([
+#                                transforms.ToPILImage(),
+#                                transforms.Resize(s, interpolation=PIL.Image.NEAREST),
+#                                transforms.ToTensor(),
+#                                AddGaussianNoise(0., std),
+#                                ])
+#         self.t = transforms.Compose([
+#                                transforms.ToPILImage(),
+#                                transforms.Resize(s, interpolation=PIL.Image.NEAREST),
+#                                transforms.ToTensor(),
+#                                #AddGaussianNoise(0., std),
+#                                ])
+#         self.fileNames = os.listdir(self.path)
+#         self.fileNames.sort()
 
-    def __getitem__(self, index):
-        file = self.path + "/" + self.df.Cell[index]
-        file2 = self.path + "/" + self.df.Field[index]
-        image = self.load_image(file)
-        # label = self.df.Label[index].astype(np.long) - 1
-        label = self.load_image(file2, add_noise=False)
-        return image, label
+#     def __len__(self):
+#         return self.df.shape[0]
 
-    def load_image(self, file_name, add_noise=True):
-        x = np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s)
-        if add_noise:
-            image = self.t_noise(x)
-        else:
-            image = self.t(x)
-        return image
+#     def __getitem__(self, index):
+#         file = self.path + "/" + self.df.Cell[index]
+#         file2 = self.path + "/" + self.df.Field[index]
+#         image = self.load_image(file)
+#         # label = self.df.Label[index].astype(np.long) - 1
+#         label = self.load_image(file2, add_noise=False)
+#         return image, label
 
-class AddGaussianNoise(object):
-    def __init__(self, mean=0., std=1.):
-        self.std = std
-        self.mean = mean
+#     def load_image(self, file_name, add_noise=True):
+#         x = np.loadtxt(file_name).astype(np.float32).reshape(self.s,self.s)
+#         if add_noise:
+#             image = self.t_noise(x)
+#         else:
+#             image = self.t(x)
+#         return image
 
-    def __call__(self, tensor):
-        return tensor + torch.randn(tensor.size()) * self.std + self.mean
+# class AddGaussianNoise(object):
+#     def __init__(self, mean=0., std=1.):
+#         self.std = std
+#         self.mean = mean
 
-    def __repr__(self):
-        return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
+#     def __call__(self, tensor):
+#         return tensor + torch.randn(tensor.size()) * self.std + self.mean
+
+#     def __repr__(self):
+#         return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
 def fetch_dataset_name(idx):
     name_number_dict = {18: 'EighteenSrcsRdm', 
@@ -301,11 +302,12 @@ def get_radial_differences(src_img, target_img, pred_img):
 
 
 if __name__ == '__main__':
+    from loaders import generateDatasets
     PATH = r'D:\Google Drive IU\phdStuff\AI-project-with-javier\diffusion project'
     device = torch.device("cpu")
     
     with torch.no_grad():
-        _, testloader = generateDatasets(datasetName = 'sample-set', 
+        _, testloader = generateDatasets(PATH, datasetName = 'sample-set', 
                                                            batch_size=1, 
                                                            num_workers=1, 
                                                            std_tr=0.0, s=512).getDataLoaders()
