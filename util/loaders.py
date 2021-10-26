@@ -12,11 +12,14 @@ from torch.utils.data import Dataset
 
 
 class MyData(Dataset):
-    def __init__(self, PATH, df, datasetName="5SourcesRdm", dset="test", std=0.25, s=512, transformation="linear"):
+    def __init__(self, PATH, df, datasetName="5SourcesRdm", dset="test", std=0.25, s=512, transformation="linear",
+                 constant_factor=1, power=0.25):
         self.s = s
         self.df = df
         self.datasetName = datasetName
         self.transformation = transformation
+        self.constant_factor = constant_factor
+        self.power = power
         if datasetName == "All":
             self.path = os.path.join(PATH, dset)
         elif datasetName == "AllSub":
@@ -51,7 +54,7 @@ class MyData(Dataset):
         label = self.load_image(file2, add_noise=False)
         return image, label
 
-    def load_image(self, file_name, add_noise=True, constant_factor=1):
+    def load_image(self, file_name, add_noise=True, constant_factor=1, power=0.25):
         if self.transformation == "linear":
             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
         elif self.transformation == "sqrt":
@@ -59,7 +62,9 @@ class MyData(Dataset):
 
         elif self.transformation == "log":
             x = np.log10(
-                constant_factor + np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
+                self.constant_factor + np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
+        elif self.transformation == "pow":
+            x = np.power(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)), self.power)
         else:
             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
 
