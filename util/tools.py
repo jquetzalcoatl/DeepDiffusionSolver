@@ -7,7 +7,8 @@ class tools(object):
         self.datasetNameList = [f'{i}SourcesRdm' for i in range(1,21)]
         self.errPerDS = [0 for i in range(1,21)]
         for (j, ds) in enumerate(self.datasetNameList):
-            trainloader, testloader = generateDatasets(PATH, datasetName=ds, batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, std_tr=std_tr, s=s).getDataLoaders()
+            trainloader, testloader = generateDatasets(PATH, datasetName=ds, batch_size=BATCH_SIZE,
+                                                       num_workers=NUM_WORKERS, std_tr=std_tr, s=s).getDataLoaders()
             with torch.no_grad():
                 erSum = 0
                 for (i, data) in enumerate(testloader):
@@ -39,18 +40,27 @@ class tools(object):
 
     def getSnapshots(self, theModel):
         r = next(iter(testloader))
-        plt.imshow(vutils.make_grid(r[0].to(device)[1:2], padding=2, normalize=False, range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],cmap='cividis', interpolation='nearest')
+        plt.imshow(vutils.make_grid(
+            r[0].to(device)[1:2], padding=2, normalize=False, range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],
+                   cmap='cividis', interpolation='nearest')
         plt.colorbar()
         plt.show()
-        plt.imshow(vutils.make_grid(r[1].to(device)[1:2], padding=2, normalize=False, range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],cmap='cividis', interpolation='nearest')
+        plt.imshow(vutils.make_grid(
+            r[1].to(device)[1:2], padding=2, normalize=False, range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],
+                   cmap='cividis', interpolation='nearest')
         plt.colorbar()
         plt.show()
         with torch.no_grad():
-            plt.imshow(vutils.make_grid(theModel(r[0].to(device)).cpu()[1:2], padding=2, normalize=False, range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],cmap='cividis', interpolation='nearest')
+            plt.imshow(vutils.make_grid(
+                theModel(r[0].to(device)).cpu()[1:2],
+                        padding=2, normalize=False, range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],
+                cmap='cividis', interpolation='nearest')
             plt.colorbar()
             plt.show()
         with torch.no_grad():
-            plt.imshow(vutils.make_grid((theModel(r[0].to(device)).cpu()[1:2]) - r[1][1:2], padding=2, normalize=False, range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],cmap='cividis', interpolation='nearest')
+            plt.imshow(vutils.make_grid((theModel(r[0].to(device)).cpu()[1:2]) - r[1][1:2], padding=2, normalize=False,
+                                        range=(-1,1),  nrow=5).detach().cpu().numpy()[1,:,:],cmap='cividis',
+                       interpolation='nearest')
             plt.colorbar()
             plt.show()
             
