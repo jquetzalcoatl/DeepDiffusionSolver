@@ -69,11 +69,8 @@ class MyData(Dataset):
             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
 
         if add_noise:
-            return self.add_noise_function(x)
-        return x
-
-    def add_noise_function(self, x):
-        return self.t(x)
+            return self.t(x)
+        return self.t_noNoise(x)
 
 
 class AddGaussianNoise(object):
