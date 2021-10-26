@@ -54,13 +54,22 @@ class MyData(Dataset):
     def load_image(self, file_name, add_noise=True):
         if self.transformation == "linear":
             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
+            if add_noise:
+                return self.add_noise_function(x)
+            return x
         elif self.transformation == "sqrt":
             x = np.sqrt(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
-        if add_noise:
-            image = self.t(x)
+            if add_noise:
+                return self.add_noise_function(x)
+            return x
         else:
-            image = self.t_noNoise(x)
-        return image
+            if add_noise:
+                return self.add_noise_function(
+                    np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
+            return np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
+        
+    def add_noise_function(self, x):
+        return self.t(x)
 
 
 class AddGaussianNoise(object):
