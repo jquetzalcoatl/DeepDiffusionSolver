@@ -51,23 +51,22 @@ class MyData(Dataset):
         label = self.load_image(file2, add_noise=False)
         return image, label
 
-    def load_image(self, file_name, add_noise=True):
+    def load_image(self, file_name, add_noise=True, constant_factor=1):
         if self.transformation == "linear":
             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
-            if add_noise:
-                return self.add_noise_function(x)
-            return x
         elif self.transformation == "sqrt":
             x = np.sqrt(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
-            if add_noise:
-                return self.add_noise_function(x)
-            return x
+
+        elif self.transformation == "log":
+            x = np.log10(
+                constant_factor + np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
         else:
-            if add_noise:
-                return self.add_noise_function(
-                    np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
-            return np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
-        
+            x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
+
+        if add_noise:
+            return self.add_noise_function(x)
+        return x
+
     def add_noise_function(self, x):
         return self.t(x)
 
