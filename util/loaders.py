@@ -12,11 +12,14 @@ from torch.utils.data import Dataset
 
 
 class MyData(Dataset):
-    def __init__(self, PATH, df, datasetName="5SourcesRdm", dset="test", std=0.25, s=512, transformation="linear"):
+    def __init__(self, PATH, df, datasetName="5SourcesRdm", dset="test", std=0.25, s=512, transformation="linear",
+                 constant_factor=1, power=0.25):
         self.s = s
         self.df = df
         self.datasetName = datasetName
         self.transformation = transformation
+        self.constant_factor = constant_factor
+        self.power = power
         if datasetName == "All":
             self.path = os.path.join(PATH, dset)
         elif datasetName == "AllSub":
@@ -56,11 +59,18 @@ class MyData(Dataset):
             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
         elif self.transformation == "sqrt":
             x = np.sqrt(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
-        if add_noise:
-            image = self.t(x)
+
+        elif self.transformation == "log":
+            x = np.log10(
+                self.constant_factor + np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
+        elif self.transformation == "pow":
+            x = np.power(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)), self.power)
         else:
-            image = self.t_noNoise(x)
-        return image
+            x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
+
+        if add_noise:
+            return self.t(x)
+        return self.t_noNoise(x)
 
 
 class AddGaussianNoise(object):
