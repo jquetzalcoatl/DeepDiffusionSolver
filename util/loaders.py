@@ -54,7 +54,7 @@ class MyData(Dataset):
         label = self.load_image(file2, add_noise=False)
         return image, label
 
-    def load_image(self, file_name, add_noise=True, constant_factor=1, power=0.25):
+    def load_image(self, file_name, add_noise=True):
         if self.transformation == "linear":
             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
         elif self.transformation == "sqrt":
