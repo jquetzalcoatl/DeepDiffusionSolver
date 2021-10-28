@@ -87,8 +87,8 @@ class tools(object):
             
 
 @torch.no_grad()
-def per_image_error(neural_net, loader, 
-                    error_fnc=nn.L1Loss(reduction='none'), device):
+def per_image_error(neural_net, loader, device,
+                    error_fnc=nn.L1Loss(reduction='none')):
     neural_net.eval()
     error1 = 0.0
     
