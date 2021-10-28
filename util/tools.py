@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from loaders import generateDatasets
+import numpy as np
+from scipy.stats import kde
 
 class tools(object):
     def errorPerDataset(self, PATH, theModel, device, BATCH_SIZE=50, NUM_WORKERS=0, std_tr=0.0, s=512):
@@ -86,7 +88,7 @@ class tools(object):
 
 @torch.no_grad()
 def per_image_error(neural_net, loader, 
-                    error_fnc=nn.L1Loss(reduction='none')):
+                    error_fnc=nn.L1Loss(reduction='none'), device):
     neural_net.eval()
     error1 = 0.0
     
@@ -146,6 +148,38 @@ def per_image_error(neural_net, loader,
         
     return error1/(i+1), error1_field/(i+1),  error1_src/(i+1),  \
            error1_per_im, error1_per_im_field, error1_per_im_src
+
+
+@torch.no_grad()
+def predVsTarget(loader, neural_net, device, transformation = "linear", threshold = 0.0, nbins = 100, BATCH_SIZE = 30, size = 512):
+    l_real, l_pred = np.array([]), np.array([])
+    with torch.no_grad():
+        for (i, data) in enumerate(loader):
+            if i > 10:
+                break
+            x = data[0].to(device)
+            y = data[1].to(device)
+            pred = neural_net(x)
+            try:
+                if transformation == "sqrt":
+                    pred = pred.pow(2)
+                    y = y.pow(2)
+            except:
+                pass
+
+            l_pred = np.append(l_pred,pred.reshape(BATCH_SIZE*size*size).cpu().numpy())
+            l_real = np.append(l_real,y.reshape(BATCH_SIZE*size*size).cpu().numpy())
+            
+    # create data 
+    x = l_real[l_real >= threshold]
+    y = l_pred[l_real >= threshold]
+
+    # Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents
+    k = kde.gaussian_kde([x,y])
+    xi, yi = np.mgrid[x.min():x.max():nbins*1j, y.min():y.max():nbins*1j]
+    zi = k(np.vstack([xi.flatten(), yi.flatten()]))
+#     plt.pcolormesh(xi, yi, np.power(zi.reshape(xi.shape) / zi.reshape(xi.shape).max(),1/8), shading='auto')
+    return xi, yi, zi
 
 
 class accuracy(object):
