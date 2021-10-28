@@ -151,11 +151,13 @@ def per_image_error(neural_net, loader,
 
 
 @torch.no_grad()
-def predVsTarget(loader, neural_net, device, transformation = "linear", threshold = 0.0, nbins = 100, BATCH_SIZE = 30, size = 512):
+def predVsTarget(loader, neural_net, device, transformation = "linear", threshold = 0.0, nbins = 100, BATCH_SIZE = 30, size = 512, lim = 10):
     l_real, l_pred = np.array([]), np.array([])
+    if lim == 0 or lim > len(loader):
+        lim = len(loader)
     with torch.no_grad():
         for (i, data) in enumerate(loader):
-            if i > 10:
+            if i > lim:
                 break
             x = data[0].to(device)
             y = data[1].to(device)
