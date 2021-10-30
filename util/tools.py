@@ -1,8 +1,109 @@
 import torch
 import torch.nn as nn
-from loaders import generateDatasets
+from loaders import generateDatasets, transformation_inverse
 import numpy as np
 from scipy.stats import kde
+
+
+@torch.no_grad()
+def per_image_error(neural_net, loader, device, transformation="linear",
+                    error_fnc=nn.L1Loss(reduction='none')):
+    neural_net.eval()
+    error1 = 0.0
+    
+    error1_field = 0.0
+    
+    error1_src = 0.0
+    
+    error1_per_im = []
+    
+    error1_per_im_field = []
+    
+    error1_per_im_src = []
+    
+    for i, data in enumerate(loader):
+        x = data[0].to(device)
+        
+        srcs = x > 0
+        
+        nan_srcs = torch.where(srcs, float('nan'), 1.0)
+        nan_rest = torch.where(srcs, 1.0, float('nan'))
+        
+        y = data[1].to(device)
+        
+        yhat = neural_net(x)
+        
+        yhat, y = transformation_inverse(yhat, y, transformation)
+        
+        e1 = error_fnc(yhat,y)
+        
+        e1_srcs = nan_rest * e1
+        e1_field = nan_srcs * e1
+        
+        
+        error1 += np.mean(e1.cpu().numpy())
+        
+        error1_field += np.nanmean(e1_field.cpu().numpy())
+        error1_src += np.nanmean(e1_srcs.cpu().numpy())
+                
+        e1_list =[]
+        
+        e1_list_field =[]
+        
+        e1_list_src =[]
+        
+        
+        for j in range(e1.shape[0]):
+            e1_list.append(np.mean(e1[j].cpu().numpy()))
+            
+            e1_list_field.append(np.nanmean(e1_field[j].cpu().numpy()))
+            
+            e1_list_src.append(np.nanmean(e1_srcs[j].cpu().numpy()))
+            
+            
+        error1_per_im.extend(e1_list)
+        
+        error1_per_im_field.extend(e1_list_field)
+        
+        error1_per_im_src.extend(e1_list_src)
+        
+    return error1/(i+1), error1_field/(i+1),  error1_src/(i+1),  \
+           error1_per_im, error1_per_im_field, error1_per_im_src
+
+
+@torch.no_grad()
+def predVsTarget(loader, neural_net, device, transformation = "linear", threshold = 0.0, nbins = 100, BATCH_SIZE = 30, size = 512, lim = 10):
+    l_real, l_pred = np.array([]), np.array([])
+    if lim == 0 or lim > len(loader):
+        lim = len(loader)
+    with torch.no_grad():
+        for (i, data) in enumerate(loader):
+            if i > lim:
+                break
+            x = data[0].to(device)
+            y = data[1].to(device)
+            pred = neural_net(x)
+            pred, y = transformation_inverse(pred, y, transformation)
+#             try:
+#                 if transformation == "sqrt":
+#                     pred = pred.pow(2)
+#                     y = y.pow(2)
+#             except:
+#                 pass
+
+            l_pred = np.append(l_pred,pred.reshape(BATCH_SIZE*size*size).cpu().numpy())
+            l_real = np.append(l_real,y.reshape(BATCH_SIZE*size*size).cpu().numpy())
+            
+    # create data 
+    x = l_real[l_real >= threshold]
+    y = l_pred[l_real >= threshold]
+
+    # Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents
+    k = kde.gaussian_kde([x,y])
+    xi, yi = np.mgrid[x.min():x.max():nbins*1j, y.min():y.max():nbins*1j]
+    zi = k(np.vstack([xi.flatten(), yi.flatten()]))
+#     plt.pcolormesh(xi, yi, np.power(zi.reshape(xi.shape) / zi.reshape(xi.shape).max(),1/8), shading='auto')
+    return xi, yi, zi
 
 class tools(object):
     def errorPerDataset(self, PATH, theModel, device, BATCH_SIZE=50, NUM_WORKERS=0, std_tr=0.0, s=512):
@@ -84,104 +185,6 @@ class tools(object):
         with torch.no_grad():
         #     plt.hist(erSum.view(50*512*512).cpu())
             self.perImage = erSum.mean(dim=(2,3)).view(50).cpu().numpy()
-            
-
-@torch.no_grad()
-def per_image_error(neural_net, loader, device,
-                    error_fnc=nn.L1Loss(reduction='none')):
-    neural_net.eval()
-    error1 = 0.0
-    
-    error1_field = 0.0
-    
-    error1_src = 0.0
-    
-    error1_per_im = []
-    
-    error1_per_im_field = []
-    
-    error1_per_im_src = []
-    
-    for i, data in enumerate(loader):
-        x = data[0].to(device)
-        
-        srcs = x > 0
-        
-        nan_srcs = torch.where(srcs, float('nan'), 1.0)
-        nan_rest = torch.where(srcs, 1.0, float('nan'))
-        
-        y = data[1].to(device)
-        
-        yhat = neural_net(x)
-        
-        e1 = error_fnc(yhat,y)
-        
-        e1_srcs = nan_rest * e1
-        e1_field = nan_srcs * e1
-        
-        
-        error1 += np.mean(e1.cpu().numpy())
-        
-        error1_field += np.nanmean(e1_field.cpu().numpy())
-        error1_src += np.nanmean(e1_srcs.cpu().numpy())
-                
-        e1_list =[]
-        
-        e1_list_field =[]
-        
-        e1_list_src =[]
-        
-        
-        for j in range(e1.shape[0]):
-            e1_list.append(np.mean(e1[j].cpu().numpy()))
-            
-            e1_list_field.append(np.nanmean(e1_field[j].cpu().numpy()))
-            
-            e1_list_src.append(np.nanmean(e1_srcs[j].cpu().numpy()))
-            
-            
-        error1_per_im.extend(e1_list)
-        
-        error1_per_im_field.extend(e1_list_field)
-        
-        error1_per_im_src.extend(e1_list_src)
-        
-    return error1/(i+1), error1_field/(i+1),  error1_src/(i+1),  \
-           error1_per_im, error1_per_im_field, error1_per_im_src
-
-
-@torch.no_grad()
-def predVsTarget(loader, neural_net, device, transformation = "linear", threshold = 0.0, nbins = 100, BATCH_SIZE = 30, size = 512, lim = 10):
-    l_real, l_pred = np.array([]), np.array([])
-    if lim == 0 or lim > len(loader):
-        lim = len(loader)
-    with torch.no_grad():
-        for (i, data) in enumerate(loader):
-            if i > lim:
-                break
-            x = data[0].to(device)
-            y = data[1].to(device)
-            pred = neural_net(x)
-            try:
-                if transformation == "sqrt":
-                    pred = pred.pow(2)
-                    y = y.pow(2)
-            except:
-                pass
-
-            l_pred = np.append(l_pred,pred.reshape(BATCH_SIZE*size*size).cpu().numpy())
-            l_real = np.append(l_real,y.reshape(BATCH_SIZE*size*size).cpu().numpy())
-            
-    # create data 
-    x = l_real[l_real >= threshold]
-    y = l_pred[l_real >= threshold]
-
-    # Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents
-    k = kde.gaussian_kde([x,y])
-    xi, yi = np.mgrid[x.min():x.max():nbins*1j, y.min():y.max():nbins*1j]
-    zi = k(np.vstack([xi.flatten(), yi.flatten()]))
-#     plt.pcolormesh(xi, yi, np.power(zi.reshape(xi.shape) / zi.reshape(xi.shape).max(),1/8), shading='auto')
-    return xi, yi, zi
 
 
 class accuracy(object):
