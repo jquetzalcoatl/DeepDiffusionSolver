@@ -55,20 +55,21 @@ class MyData(Dataset):
         return image, label
 
     def load_image(self, file_name, add_noise=True):
-#         if self.transformation == "linear":
-#             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
-#         elif self.transformation == "sqrt":
-#             x = np.sqrt(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
+        #         if self.transformation == "linear":
+        #             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
+        #         elif self.transformation == "sqrt":
+        #             x = np.sqrt(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
 
-#         elif self.transformation == "log":
-#             x = np.log10(
-#                 self.constant_factor + np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
-#         elif self.transformation == "pow":
-#             x = np.power(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)), self.power)
-#         else:
-#             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
-            
-        x = transformation(file_name, self.transformation, self.s, power=self.power, constant_factor=self.constant_factor)
+        #         elif self.transformation == "log":
+        #             x = np.log10(
+        #                 self.constant_factor + np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)))
+        #         elif self.transformation == "pow":
+        #             x = np.power(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s)), self.power)
+        #         else:
+        #             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
+
+        x = transformation(file_name, self.transformation, self.s, power=self.power,
+                           constant_factor=self.constant_factor)
 
         if add_noise:
             return self.t(x)
@@ -293,21 +294,25 @@ class inOut(object):
 
         dict["Log"] = os.path.join(path, 'DiffSolver.log')
 
+
 #         self.logging.info(f'{str(self.initTime).split(".")[0]} - Bulk Export started')
 #         self.logging.info(f'bulkImport - Data will be dumped in {self.pathToDump}')
 
 def saveJSON(obj, PATH, filename):
     dictJSON = json.dumps(obj)
     os.path.isdir(PATH) or os.mkdir(PATH)
-    f = open(os.path.join(PATH, filename),"w")
+    f = open(os.path.join(PATH, filename), "w")
     f.write(dictJSON)
     f.close()
-        
+
+
 def loadJSON(PATH, filename):
     with open(os.path.join(PATH, filename), 'r') as h:
         js = json.load(h)
     return js
 
+
+@torch.no_grad()
 def transformation(file_name, transformation, size, power=2, constant_factor=1):
     if transformation == "linear":
         x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(size, size))
@@ -321,9 +326,11 @@ def transformation(file_name, transformation, size, power=2, constant_factor=1):
         x = np.power(np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(size, size)), power)
     else:
         x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(size, size))
-        
+
     return x
 
+
+@torch.no_grad()
 def transformation_inverse(yhat, y, transformation, power=2, constant_factor=1):
     if transformation == "linear":
         pass
@@ -334,9 +341,7 @@ def transformation_inverse(yhat, y, transformation, power=2, constant_factor=1):
         yhat = torch.pow(torch.Tensor([10]), yhat) - torch.ones_like(yhat)
         y = torch.pow(torch.Tensor([10]), y) - torch.ones_like(y)
     elif transformation == "pow":
-        yhat = yhat.pow(1.0/power)
-        y = y.pow(1.0/power)
+        yhat = yhat.pow(1.0 / power)
+        y = y.pow(1.0 / power)
 
-        
     return yhat, y
-
