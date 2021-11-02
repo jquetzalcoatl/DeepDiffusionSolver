@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from loaders import generateDatasets, transformation_inverse
+from .loaders import generateDatasets, transformation_inverse
 import numpy as np
 from scipy.stats import kde
 
