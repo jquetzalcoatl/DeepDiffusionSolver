@@ -22,11 +22,18 @@ class Train:
         self.device = device
         self.std_tr = std_tr
         self.s = s
-
     @staticmethod
-    def my_loss(output, target, alph=2, w=1):
-        loss = torch.mean(torch.exp(-(torch.ones_like(output) - output) / w) * torch.abs((output - target) ** alph))
+    def my_loss(output, target, alph=1, w=1, w2 = 2000):
+#         loss = torch.mean(torch.exp(-torch.abs(torch.ones_like(output) - output)/w) * torch.abs((output - target)**alph))
+        loss = torch.mean((1 + torch.tanh(w*target) * w2) * torch.abs((output - target)**alph))
+        dict["w"] = w
+        dict["w2"] = w2
+        dict["alph"] = alph
         return loss
+#     @staticmethod
+#     def my_loss(output, target, alph=2, w=1):
+#         loss = torch.mean(torch.exp(-(torch.ones_like(output) - output) / w) * torch.abs((output - target) ** alph))
+#         return loss
 
     @staticmethod
     def test_diff_error(neural_net, loader, criterion, device):
@@ -102,11 +109,11 @@ class Train:
                 error += err.item()
             error_list.append(error / (i + 1))
 
-            test_error.append(self.test_diff_error(diff_solver, test_loader, criterion))
+            test_error.append(self.test_diff_error(diff_solver, test_loader, criterion, device))
             if test_loader_plus is not None:
-                test_error_plus.append(self.test_diff_error(diff_solver, test_loader_plus, criterion))
+                test_error_plus.append(self.test_diff_error(diff_solver, test_loader_plus, criterion, device))
             if test_loader_minus is not None:
-                test_error_minus.append(self.test_diff_error(diff_solver, test_loader_minus, criterion))
+                test_error_minus.append(self.test_diff_error(diff_solver, test_loader_minus, criterion, device))
 
             with open(os.path.join(save_loc, 'train_error.csv'), 'w+') as f:
                 writer = csv.writer(f)
