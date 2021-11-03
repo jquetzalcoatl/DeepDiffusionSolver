@@ -26,9 +26,9 @@ class Train:
     def my_loss(output, target, alph=1, w=1, w2 = 2000):
 #         loss = torch.mean(torch.exp(-torch.abs(torch.ones_like(output) - output)/w) * torch.abs((output - target)**alph))
         loss = torch.mean((1 + torch.tanh(w*target) * w2) * torch.abs((output - target)**alph))
-        dict["w"] = w
-        dict["w2"] = w2
-        dict["alph"] = alph
+#         dict["w"] = w
+#         dict["w2"] = w2
+#         dict["alph"] = alph
         return loss
 #     @staticmethod
 #     def my_loss(output, target, alph=2, w=1):
