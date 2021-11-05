@@ -22,6 +22,7 @@ class Train:
         self.device = device
         self.std_tr = std_tr
         self.s = s
+
     @staticmethod
     def my_loss(output, target, alph=1, w=1, w2 = 2000):
 #         loss = torch.mean(torch.exp(-torch.abs(torch.ones_like(output) - output)/w) * torch.abs((output - target)**alph))
