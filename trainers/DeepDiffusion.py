@@ -52,6 +52,7 @@ class Train:
     def train_diff_solver(self, load_loc, save_loc, lr, BATCH_SIZE, NUM_WORKERS, epochs=100, snap=25,
                           dataset_name='TwoSourcesRdm', transformation='linear'):
         from datetime import datetime
+        device = self.device
         if not os.path.isdir(save_loc):
             os.mkdir(save_loc)
         save_loc = os.path.join(save_loc, datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
