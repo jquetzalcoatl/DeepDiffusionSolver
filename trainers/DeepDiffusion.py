@@ -18,10 +18,16 @@ def save_model(save_loc, model, opt, error_list, epoch):
 
 class Train:
 
-    def __init__(self, device, std_tr, s):
+    def __init__(self, device, std_tr, s, custom_loss=None):
         self.device = device
         self.std_tr = std_tr
         self.s = s
+
+        if custom_loss is None:
+            self.loss = self.my_loss
+        else:
+            self.loss = custom_loss
+
     @staticmethod
     def my_loss(output, target, alph=1, w=1, w2 = 2000):
 #         loss = torch.mean(torch.exp(-torch.abs(torch.ones_like(output) - output)/w) * torch.abs((output - target)**alph))
@@ -61,7 +67,7 @@ class Train:
         print('Save location:', save_loc)
 
         diff_solver = util.NNets.SimpleCNN().to(self.device)
-        criterion = self.my_loss
+        criterion = self.loss
 
         opt = optim.Adam(diff_solver.parameters(), lr=lr)
         train_loader, test_loader = util.loaders.generateDatasets(PATH=load_loc,
