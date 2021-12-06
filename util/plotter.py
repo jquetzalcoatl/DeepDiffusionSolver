@@ -3,6 +3,8 @@ import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
+from loaders import generateDatasets, transformation_inverse
+from tools import errInSample
 
 
 class myPlots():
@@ -106,3 +108,31 @@ class myPlots():
             vutils.make_grid(fake_batch.to(device), padding=2, normalize=False, range=(-1, 1), nrow=5).detach().cpu()[1,
             :, :], cmap='cividis', interpolation='nearest')
         plt.show()
+        
+        
+# @torch.no_grad()
+def plotSamp(theModel, testloader, dict, device, PATH, plotName, n=1):
+    data = next(iter(testloader))
+    (x, y) = data
+
+    yhat = theModel(x.to(device))
+    yhat, y = transformation_inverse(yhat, y, dict['transformation'])
+    
+    er, erF, erS, erList, erFList, erSList = errInSample(data, device, theModel)
+    
+
+    fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(80.5, 80.5))
+
+    im = axs.imshow(
+        vutils.make_grid(y.to(device)[:n] - yhat.to(device)[:n], padding=2, normalize=False, range=(-1, 1),
+                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis', interpolation='nearest')
+    axs.xaxis.set_tick_params(labelsize=50)
+    axs.yaxis.set_tick_params(labelsize=50)
+    axs.tick_params(axis='both', which='major', labelsize=50)
+    axs.tick_params(axis='both', which='minor', labelsize=50)
+    axs.set_title(f'all: {erList[0]}, Src: {erSList[0]}, Field: {erFList[0]}',fontsize=70)
+    cb = fig.colorbar(im, ax=axs)
+    cb.ax.tick_params(labelsize=50)
+
+    plt.savefig(os.path.join(PATH, "AfterPlots", "Samples", plotName), transparent=False)
+    plt.show()

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .loaders import generateDatasets, transformation_inverse
+from loaders import generateDatasets, transformation_inverse
 import numpy as np
 from scipy.stats import kde
 
@@ -104,6 +104,70 @@ def predVsTarget(loader, neural_net, device, transformation = "linear", threshol
     zi = k(np.vstack([xi.flatten(), yi.flatten()]))
 #     plt.pcolormesh(xi, yi, np.power(zi.reshape(xi.shape) / zi.reshape(xi.shape).max(),1/8), shading='auto')
     return xi, yi, zi
+
+@torch.no_grad()    
+def errInSample(data, device, theModel):
+    error1 = 0.0
+    
+    error1_field = 0.0
+    
+    error1_src = 0.0
+    
+    error1_per_im = []
+    
+    error1_per_im_field = []
+    
+    error1_per_im_src = []
+    
+#     for i, data in enumerate(loader):
+#     data = next(iter(testloader))
+    x = data[0].to(device)
+
+    srcs = x > 0
+
+    nan_srcs = torch.where(srcs, float('nan'), 1.0)
+    nan_rest = torch.where(srcs, 1.0, float('nan'))
+
+    y = data[1].to(device)
+
+    yhat = theModel(x)
+
+    yhat, y = transformation_inverse(yhat, y, dict['transformation'])
+
+    e1 = nn.L1Loss(reduction='none')(yhat,y.to(device))
+
+    e1_srcs = nan_rest * e1
+    e1_field = nan_srcs * e1
+
+
+    error1 += np.mean(e1.cpu().numpy())
+
+    error1_field += np.nanmean(e1_field.cpu().numpy())
+    error1_src += np.nanmean(e1_srcs.cpu().numpy())
+
+    e1_list =[]
+
+    e1_list_field =[]
+
+    e1_list_src =[]
+
+
+    for j in range(e1.shape[0]):
+        e1_list.append(np.mean(e1[j].cpu().numpy()))
+
+        e1_list_field.append(np.nanmean(e1_field[j].cpu().numpy()))
+
+        e1_list_src.append(np.nanmean(e1_srcs[j].cpu().numpy()))
+
+
+    error1_per_im.extend(e1_list)
+
+    error1_per_im_field.extend(e1_list_field)
+
+    error1_per_im_src.extend(e1_list_src)
+
+    return error1, error1_field,  error1_src,  \
+           error1_per_im, error1_per_im_field, error1_per_im_src
 
 class tools(object):
     def errorPerDataset(self, PATH, theModel, device, BATCH_SIZE=50, NUM_WORKERS=0, std_tr=0.0, s=512):
