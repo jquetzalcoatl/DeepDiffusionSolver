@@ -24,6 +24,8 @@ class MyData(Dataset):
             self.path = os.path.join(PATH, dset)
         elif datasetName == "AllSub":
             self.path = os.path.join(PATH, dset)
+        elif datasetName == "AllHalf":
+            self.path = os.path.join(PATH, dset)
         else:
             self.path = os.path.join(PATH, datasetName, dset)
         self.t = transforms.Compose([
@@ -42,7 +44,7 @@ class MyData(Dataset):
         return self.df.shape[0]
 
     def __getitem__(self, index):
-        if self.datasetName != "All" and self.datasetName != "AllSub":
+        if self.datasetName != "All" and self.datasetName != "AllSub" and self.datasetName != "AllHalf":
             file = self.path + "/" + self.df.Cell[index]
             file2 = self.path + "/" + self.df.Field[index]
         else:
@@ -93,12 +95,15 @@ class generateDatasets(object):
                  transformation="linear"):
         self.bsize = batch_size
         self.nworkers = num_workers
-        if datasetName != "All" and datasetName != "AllSub":
+        if datasetName != "All" and datasetName != "AllSub" and datasetName != "AllHalf":
             self.df_test = pd.read_csv(os.path.join(PATH, datasetName) + "/test.csv")
             self.df_train = pd.read_csv(os.path.join(PATH, datasetName) + "/train.csv")
         elif datasetName == "AllSub":
             self.df_test = pd.read_csv(os.path.join(PATH) + "/testSub.csv")
             self.df_train = pd.read_csv(os.path.join(PATH) + "/trainSub.csv")
+        elif datasetName == "AllHalf":
+            self.df_test = pd.read_csv(os.path.join(PATH) + "/testHalf.csv")
+            self.df_train = pd.read_csv(os.path.join(PATH) + "/trainHalf.csv")
         else:
             self.df_test = pd.read_csv(os.path.join(PATH) + "/test.csv")
             self.df_train = pd.read_csv(os.path.join(PATH) + "/train.csv")
