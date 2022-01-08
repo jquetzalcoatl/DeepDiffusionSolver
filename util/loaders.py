@@ -257,10 +257,7 @@ class inOut(object):
             "Loss"    : [],
             "LossTest": [],
         }
-        dictJSON = json.dumps(dict)
-        f = open(dict["Path"][-1], "w")
-        f.write(dictJSON)
-        f.close()
+        self.saveDict(dict)
         return dict
 
     def loadDict(self, dir):
@@ -270,10 +267,16 @@ class inOut(object):
         return dict
 
     def saveDict(self, dict):
+        dict["LastUpdated"] = [self.timestamp()]
         dictJSON = json.dumps(dict)
         f = open(dict["Path"][-1], "w")
         f.write(dictJSON)
         f.close()
+        
+    def timestamp(self):
+        date = datetime.now().__str__()
+        date = date[:19].replace(' ', '-')
+        return date
 
     def logFunc(self, PATH, dict, dir="0"):
         self.initTime = datetime.now()

@@ -153,7 +153,7 @@ def plotSampRelative(theModel, testloader, dict, device, PATH, plotName, n=1, TO
     t = (y.to(device)[:n] - yhat.to(device)[:n])/(y.to(device)[:n] + torch.ones_like(y[:n]).to(device) * TOL)
     im = axs[0,0].imshow(
         vutils.make_grid(torch.sign(t) * torch.min(torch.Tensor([maxvalue]).to(device),torch.abs(t)), padding=2, normalize=False, range=(-1, 1),
-                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis', interpolation='nearest')
+                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic', interpolation='nearest')
     axs[0,0].xaxis.set_tick_params(labelsize=50)
     axs[0,0].yaxis.set_tick_params(labelsize=50)
     axs[0,0].tick_params(axis='both', which='major', labelsize=50)
@@ -164,18 +164,18 @@ def plotSampRelative(theModel, testloader, dict, device, PATH, plotName, n=1, TO
 
     im = axs[0,1].imshow(
         vutils.make_grid((y.to(device)[:n] - yhat.to(device)[:n]), padding=2, normalize=False, range=(-1, 1),
-                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis', interpolation='nearest')
+                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic', interpolation='nearest')
     axs[0,1].xaxis.set_tick_params(labelsize=50)
     axs[0,1].yaxis.set_tick_params(labelsize=50)
     axs[0,1].tick_params(axis='both', which='major', labelsize=50)
     axs[0,1].tick_params(axis='both', which='minor', labelsize=50)
-    axs[0,1].set_title(f'Absolute error \n all: {np.round(erList[0],5)}, \n Src: {np.round(erSList[0],5)}, \n Field: {np.round(erFList[0],5)}',fontsize=70)
+    axs[0,1].set_title(f'Error \n all: {np.round(erList[0],5)}, \n Src: {np.round(erSList[0],5)}, \n Field: {np.round(erFList[0],5)}',fontsize=70)
     cb = fig.colorbar(im, ax=axs[0,1])
     cb.ax.tick_params(labelsize=50)
     
     im = axs[1,0].imshow(
         vutils.make_grid((y.to(device)[:n] - yhat.to(device)[:n]) * ( 2.0 * torch.ones_like(y[:n]).to(device) - y[:n].to(device) ), padding=2, normalize=False, range=(-1, 1),
-                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis', interpolation='nearest')
+                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic', interpolation='nearest')
     axs[1,0].xaxis.set_tick_params(labelsize=50)
     axs[1,0].yaxis.set_tick_params(labelsize=50)
     axs[1,0].tick_params(axis='both', which='major', labelsize=50)
@@ -186,7 +186,7 @@ def plotSampRelative(theModel, testloader, dict, device, PATH, plotName, n=1, TO
     
     im = axs[1,1].imshow(
         vutils.make_grid((y.to(device)[:n] - yhat.to(device)[:n]) * ( torch.pow(y[:n].to(device), power-1.0) + torch.pow(torch.ones_like(y[:n]).to(device) - y[:n].to(device), power) ), padding=2, normalize=False, range=(-1, 1),
-                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis', interpolation='nearest')
+                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic', interpolation='nearest')
     axs[1,1].xaxis.set_tick_params(labelsize=50)
     axs[1,1].yaxis.set_tick_params(labelsize=50)
     axs[1,1].tick_params(axis='both', which='major', labelsize=50)
