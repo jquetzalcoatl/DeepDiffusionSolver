@@ -75,12 +75,12 @@ class myPlots():
 
         im = axs[2, 0].imshow(
             vutils.make_grid(y.to(device)[:25] - yhat.to(device)[:25], padding=2, normalize=False, range=(-1, 1),
-                             nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis', interpolation='nearest')
+                             nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic', interpolation='nearest')
         fig.colorbar(im, ax=axs[2, 0])
 
         im = axs[2, 1].imshow(
             vutils.make_grid(y.to(device)[:25] - (yhat.to(device) / yhat.to(device).max())[:25], padding=2,
-                             normalize=False, range=(-1, 1), nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis',
+                             normalize=False, range=(-1, 1), nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic',
             interpolation='nearest')
         fig.colorbar(im, ax=axs[2, 1])
         plt.show()
@@ -127,7 +127,7 @@ def plotSamp(theModel, testloader, dict, device, PATH, plotName, n=1):
 
     im = axs.imshow(
         vutils.make_grid(y.to(device)[:n] - yhat.to(device)[:n], padding=2, normalize=False, range=(-1, 1),
-                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='cividis', interpolation='nearest')
+                         nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic', interpolation='nearest')
     axs.xaxis.set_tick_params(labelsize=50)
     axs.yaxis.set_tick_params(labelsize=50)
     axs.tick_params(axis='both', which='major', labelsize=50)
