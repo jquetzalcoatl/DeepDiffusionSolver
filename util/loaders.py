@@ -53,7 +53,7 @@ class MyData(Dataset):
 
     def __getitem__(self, index):
 #         if self.datasetName != "All" and self.datasetName != "AllSub" and self.datasetName != "AllHalf":
-        if datasetName not in datasetDict.keys():
+        if self.datasetName not in datasetDict.keys():
             file = self.path + "/" + self.df.Cell[index]
             file2 = self.path + "/" + self.df.Field[index]
         else:
