@@ -10,6 +10,12 @@ import torch
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 
+datasetDict = {"All" : ["/test.csv", "/train.csv"], 
+               "AllSub" : ["/testSub.csv", "/trainSub.csv"], 
+               "AllHalf" : ["/testHalf.csv", "/trainHalf.csv"], 
+               "AllDouble" : ["/test2:1.csv", "/train2:1.csv"], 
+               "AllFourth" : ["/test4:1.csv", "/train4:1.csv"]}
+
 
 class MyData(Dataset):
     def __init__(self, PATH, df, datasetName="5SourcesRdm", dset="test", std=0.25, s=512, transformation="linear",
@@ -20,12 +26,14 @@ class MyData(Dataset):
         self.transformation = transformation
         self.constant_factor = constant_factor
         self.power = power
-        if datasetName == "All":
+        if datasetName in datasetDict.keys():
             self.path = os.path.join(PATH, dset)
-        elif datasetName == "AllSub":
-            self.path = os.path.join(PATH, dset)
-        elif datasetName == "AllHalf":
-            self.path = os.path.join(PATH, dset)
+#         if datasetName == "All":
+#             self.path = os.path.join(PATH, dset)
+#         elif datasetName == "AllSub":
+#             self.path = os.path.join(PATH, dset)
+#         elif datasetName == "AllHalf":
+#             self.path = os.path.join(PATH, dset)
         else:
             self.path = os.path.join(PATH, datasetName, dset)
         self.t = transforms.Compose([
@@ -44,7 +52,8 @@ class MyData(Dataset):
         return self.df.shape[0]
 
     def __getitem__(self, index):
-        if self.datasetName != "All" and self.datasetName != "AllSub" and self.datasetName != "AllHalf":
+#         if self.datasetName != "All" and self.datasetName != "AllSub" and self.datasetName != "AllHalf":
+        if datasetName not in datasetDict.keys():
             file = self.path + "/" + self.df.Cell[index]
             file2 = self.path + "/" + self.df.Field[index]
         else:
@@ -56,7 +65,7 @@ class MyData(Dataset):
         label = self.load_image(file2, add_noise=False)
         return image, label
 
-    def load_image(self, file_name, add_noise=True):
+    def load_image(self, file_name, add_noise=False):
         #         if self.transformation == "linear":
         #             x = np.absolute(np.loadtxt(file_name).astype(np.float32).reshape(self.s, self.s))
         #         elif self.transformation == "sqrt":
@@ -95,18 +104,25 @@ class generateDatasets(object):
                  transformation="linear"):
         self.bsize = batch_size
         self.nworkers = num_workers
-        if datasetName != "All" and datasetName != "AllSub" and datasetName != "AllHalf":
+#         if datasetName != "All" and datasetName != "AllSub" and datasetName != "AllHalf":
+#             self.df_test = pd.read_csv(os.path.join(PATH, datasetName) + "/test.csv")
+#             self.df_train = pd.read_csv(os.path.join(PATH, datasetName) + "/train.csv")
+#         elif datasetName == "AllSub":
+#             self.df_test = pd.read_csv(os.path.join(PATH) + "/testSub.csv")
+#             self.df_train = pd.read_csv(os.path.join(PATH) + "/trainSub.csv")
+#         elif datasetName == "AllHalf":
+#             self.df_test = pd.read_csv(os.path.join(PATH) + "/testHalf.csv")
+#             self.df_train = pd.read_csv(os.path.join(PATH) + "/trainHalf.csv")
+#         else:
+#             self.df_test = pd.read_csv(os.path.join(PATH) + "/test.csv")
+#             self.df_train = pd.read_csv(os.path.join(PATH) + "/train.csv")
+        
+        if datasetName in datasetDict.keys():
+            self.df_test = pd.read_csv(os.path.join(PATH) + datasetDict[datasetName][0])
+            self.df_train = pd.read_csv(os.path.join(PATH) + datasetDict[datasetName][1])
+        else:
             self.df_test = pd.read_csv(os.path.join(PATH, datasetName) + "/test.csv")
             self.df_train = pd.read_csv(os.path.join(PATH, datasetName) + "/train.csv")
-        elif datasetName == "AllSub":
-            self.df_test = pd.read_csv(os.path.join(PATH) + "/testSub.csv")
-            self.df_train = pd.read_csv(os.path.join(PATH) + "/trainSub.csv")
-        elif datasetName == "AllHalf":
-            self.df_test = pd.read_csv(os.path.join(PATH) + "/testHalf.csv")
-            self.df_train = pd.read_csv(os.path.join(PATH) + "/trainHalf.csv")
-        else:
-            self.df_test = pd.read_csv(os.path.join(PATH) + "/test.csv")
-            self.df_train = pd.read_csv(os.path.join(PATH) + "/train.csv")
         self.test = MyData(PATH, self.df_test, datasetName=datasetName, dset="test", std=0.0, s=s,
                            transformation=transformation)
         self.train = MyData(PATH, self.df_train, datasetName=datasetName, dset="train", std=std_tr, s=s,
