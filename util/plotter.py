@@ -20,7 +20,7 @@ class myPlots():
         plt.show()
 
     def plotDiff(self, PATH, dir, device, error_list, error_list_test, testloader, diff, epoch,
-                 transformation="linear"):
+                 transformation="linear", bash=False):
         (x, y) = next(iter(testloader))
         # y = next(iter(testloader))[1]
         yhat = diff(x.to(device))
@@ -83,7 +83,8 @@ class myPlots():
                              normalize=False, range=(-1, 1), nrow=5).detach().cpu().numpy()[1, :, :], cmap='seismic',
             interpolation='nearest')
         fig.colorbar(im, ax=axs[2, 1])
-        plt.show()
+        if bash == False:
+            plt.show()
         # Adding this here for the time being
         os.path.isdir(PATH + "Plots/") or os.mkdir(PATH + "Plots/")
         path = PATH + "Plots/" + dir + "/"
