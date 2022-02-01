@@ -169,6 +169,104 @@ def errInSample(data, device, theModel):
     return error1, error1_field,  error1_src,  \
            error1_per_im, error1_per_im_field, error1_per_im_src
 
+@torch.no_grad()    
+def errInDS(neural_net, loader, device, transformation="linear",
+                    error_fnc=nn.L1Loss(reduction='none')):
+    error1 = 0.0
+    
+    error1_field = 0.0
+    
+    error1_src = 0.0
+    
+    errorMax = 0.0
+    
+    errorMax_field = 0.0
+    
+    errorMax_src = 0.0
+    
+    errorMaxm = 0.0
+    
+    errorMaxm_field = 0.0
+    
+    errorMaxm_src = 0.0
+    
+    errorMin = 0.0
+    
+    errorMin_field = 0.0
+    
+    errorMin_src = 0.0
+    
+    errorMinm = 0.0
+    
+    errorMinm_field = 0.0
+    
+    errorMinm_src = 0.0
+    
+#     error1_per_im = []
+    
+#     error1_per_im_field = []
+    
+#     error1_per_im_src = []
+    
+    for i, data in enumerate(loader):
+        x = data[0].to(device)
+        
+        srcs = x > 0
+        
+        nan_srcs = torch.where(srcs, float('nan'), 1.0)
+        nan_rest = torch.where(srcs, 1.0, float('nan'))
+        
+        y = data[1].to(device)
+        
+        yhat = neural_net(x)
+        
+        yhat, y = transformation_inverse(yhat, y, transformation)
+        
+        e1 = error_fnc(yhat,y)
+        
+        e1_srcs = nan_rest * e1
+        e1_field = nan_srcs * e1
+        
+        
+        error1 += np.mean(e1.cpu().numpy())
+        
+        error1_field += np.nanmean(e1_field.cpu().numpy())
+        error1_src += np.nanmean(e1_srcs.cpu().numpy())
+        
+        errorMax = np.maximum(errorMax, np.nanmax(e1.cpu().numpy()))
+        errorMax_field = np.maximum(errorMax_field, np.nanmax(e1_field.cpu().numpy()))
+        errorMax_src = np.maximum(errorMax_src, np.nanmax(e1_field.cpu().numpy()))
+        
+        errorMaxm += np.nanmax(e1.cpu().numpy())
+        errorMaxm_field += np.nanmax(e1_field.cpu().numpy())
+        errorMaxm_src += np.nanmax(e1_field.cpu().numpy())
+        
+        errorMin = np.minimum(errorMin, np.nanmin(e1.cpu().numpy()))
+        errorMin_field = np.minimum(errorMin_field, np.nanmin(e1_field.cpu().numpy()))
+        errorMin_src = np.minimum(errorMin_src, np.nanmin(e1_field.cpu().numpy()))
+        
+        errorMinm += np.nanmin(e1.cpu().numpy())
+        errorMinm_field += np.nanmin(e1_field.cpu().numpy())
+        errorMinm_src += np.nanmin(e1_field.cpu().numpy())
+                
+#         e1_list =[]        
+#         e1_list_field =[]        
+#         e1_list_src =[]        
+#         for j in range(e1.shape[0]):
+#             e1_list.append(np.mean(e1[j].cpu().numpy()))            
+#             e1_list_field.append(np.nanmean(e1_field[j].cpu().numpy()))            
+#             e1_list_src.append(np.nanmean(e1_srcs[j].cpu().numpy()))                        
+#         error1_per_im.extend(e1_list)        
+#         error1_per_im_field.extend(e1_list_field)       
+#         error1_per_im_src.extend(e1_list_src)
+        
+    return error1/(i+1), error1_field/(i+1),  error1_src/(i+1),  \
+            errorMax, errorMax_field, errorMax_src, \
+            errorMaxm, errorMaxm_field, errorMaxm_src, \
+            errorMin, errorMin_field, errorMin_src, \
+            errorMinm, errorMinm_field, errorMinm_src
+
+
 class tools(object):
     def errorPerDataset(self, PATH, theModel, device, BATCH_SIZE=50, NUM_WORKERS=0, std_tr=0.0, s=512):
         self.datasetNameList = [f'{i}SourcesRdm' for i in range(1,21)]
