@@ -235,19 +235,19 @@ def errInDS(neural_net, loader, device, transformation="linear",
         
         errorMax = np.maximum(errorMax, np.nanmax(e1.cpu().numpy()))
         errorMax_field = np.maximum(errorMax_field, np.nanmax(e1_field.cpu().numpy()))
-        errorMax_src = np.maximum(errorMax_src, np.nanmax(e1_field.cpu().numpy()))
+        errorMax_src = np.maximum(errorMax_src, np.nanmax(e1_srcs.cpu().numpy()))
         
         errorMaxm += np.nanmax(e1.cpu().numpy())
         errorMaxm_field += np.nanmax(e1_field.cpu().numpy())
-        errorMaxm_src += np.nanmax(e1_field.cpu().numpy())
+        errorMaxm_src += np.nanmax(e1_srcs.cpu().numpy())
         
         errorMin = np.minimum(errorMin, np.nanmin(e1.cpu().numpy()))
         errorMin_field = np.minimum(errorMin_field, np.nanmin(e1_field.cpu().numpy()))
-        errorMin_src = np.minimum(errorMin_src, np.nanmin(e1_field.cpu().numpy()))
+        errorMin_src = np.minimum(errorMin_src, np.nanmin(e1_srcs.cpu().numpy()))
         
         errorMinm += np.nanmin(e1.cpu().numpy())
         errorMinm_field += np.nanmin(e1_field.cpu().numpy())
-        errorMinm_src += np.nanmin(e1_field.cpu().numpy())
+        errorMinm_src += np.nanmin(e1_srcs.cpu().numpy())
                 
 #         e1_list =[]        
 #         e1_list_field =[]        
@@ -262,9 +262,9 @@ def errInDS(neural_net, loader, device, transformation="linear",
         
     return error1/(i+1), error1_field/(i+1),  error1_src/(i+1),  \
             errorMax, errorMax_field, errorMax_src, \
-            errorMaxm, errorMaxm_field, errorMaxm_src, \
+            errorMaxm/(i+1), errorMaxm_field/(i+1), errorMaxm_src/(i+1), \
             errorMin, errorMin_field, errorMin_src, \
-            errorMinm, errorMinm_field, errorMinm_src
+            errorMinm/(i+1), errorMinm_field/(i+1), errorMinm_src/(i+1)
 
 
 class tools(object):
