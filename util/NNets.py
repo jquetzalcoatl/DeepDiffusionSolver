@@ -183,26 +183,28 @@ class JuliaCNN100(nn.Module):
         self.p1 = p1
         self.p2 = p2
         self.nn1 = nn.Sequential(nn.Conv2d(1, 1, 3, 1, 1),
+                                 nn.LeakyReLU(negative_slope=0.02),
                                  nn.Dropout2d(self.dout1),
                                  nn.BatchNorm2d(1),
                                  
                                  nn.Conv2d(1, 1, 3, 1, 1),
-#                                  nn.Dropout2d(self.dout1),
+                                 nn.LeakyReLU(negative_slope=0.02),
                                  nn.BatchNorm2d(1),
                                  
                                  nn.Conv2d(1, 1, 3, 1, 1),
-#                                  nn.Dropout2d(self.dout1),
+                                 nn.LeakyReLU(negative_slope=0.02),
                                  nn.BatchNorm2d(1),
                                  
                                  nn.Conv2d(1, 1, 3, 1, 1),
-#                                  nn.Dropout2d(self.dout1),
+                                 nn.LeakyReLU(negative_slope=0.02),
                                  nn.BatchNorm2d(1),
                                  
                                  nn.Conv2d(1, 1, 3, 1, 1),
-#                                  nn.Dropout2d(self.dout1),
+                                 nn.LeakyReLU(negative_slope=0.02),
                                  nn.BatchNorm2d(1),
                                  
                                  nn.Conv2d(1, 1, 3, 1, 1),
+                                 nn.ReLU(),
                                  nn.Dropout2d(self.dout2),
 #                                  nn.BatchNorm2d(1),
                                 )
