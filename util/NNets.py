@@ -204,7 +204,7 @@ class JuliaCNN100(nn.Module):
                                  
                                  nn.Conv2d(1, 1, 3, 1, 1),
                                  nn.Dropout2d(self.dout2),
-                                 nn.BatchNorm2d(1),
+#                                  nn.BatchNorm2d(1),
                                 )
         self.seqIn = nn.Sequential(nn.Conv2d(1, 64, 3, 1, 1),
                                    nn.ReLU(),
@@ -256,7 +256,7 @@ class JuliaCNN100(nn.Module):
                                     nn.Dropout2d(self.dout4),
                                     nn.ConvTranspose2d(64, 1, 4, 2, 2),
                                     nn.ReLU(),
-                                    nn.BatchNorm2d(1),
+#                                     nn.BatchNorm2d(1),
 
                                    )
         self.nn2 = nn.Sequential(self.seqIn,
