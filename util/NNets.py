@@ -114,7 +114,7 @@ class SimpleCNN(nn.Module):
     
 class SimpleCNN100(nn.Module):
     def __init__(self): #Same as previous but specifically for 100x100 input
-        super(SimpleCNN, self).__init__()
+        super(SimpleCNN100, self).__init__()
         self.seqIn = nn.Sequential(nn.Conv2d(1, 64, 3, 1, 1),
                                    nn.BatchNorm2d(64),
                                    nn.LeakyReLU(negative_slope=0.02),
