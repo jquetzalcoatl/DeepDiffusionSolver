@@ -111,6 +111,163 @@ class SimpleCNN(nn.Module):
         x1 = self.seqIn(x)
         x1 = self.seqOut(x1)
         return x1
+    
+class SimpleCNN100(nn.Module):
+    def __init__(self): #Same as previous but specifically for 100x100 input
+        super(SimpleCNN, self).__init__()
+        self.seqIn = nn.Sequential(nn.Conv2d(1, 64, 3, 1, 1),
+                                   nn.BatchNorm2d(64),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(64, 128, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(128, 256, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(256, 512, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(512, 1024, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(1024, 2048, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+#                                    nn.AvgPool2d(2),
+                                   )
+
+        self.seqOut = nn.Sequential(nn.ConvTranspose2d(2048, 1024, 3, 1, 1),
+                                    nn.LeakyReLU(negative_slope=0.02),
+
+                                    nn.ConvTranspose2d(1024, 512, 3, 1, 1),
+                                    nn.LeakyReLU(negative_slope=0.02),
+                                    nn.Upsample(scale_factor=2), #6
+
+                                    nn.ConvTranspose2d(512, 256, 3, 1, 1),
+                                    nn.LeakyReLU(negative_slope=0.02),
+                                    nn.Upsample(scale_factor=2),  #12
+
+                                    nn.ConvTranspose2d(256, 128, 3, 1, 1),
+                                    nn.LeakyReLU(negative_slope=0.02),
+                                    nn.Upsample(scale_factor=2), #24
+
+#                                     nn.ConvTranspose2d(128, 64, 3, 1, 1),
+                                    nn.ConvTranspose2d(128,64,2,1,0),
+                                    nn.LeakyReLU(negative_slope=0.02),
+                                    nn.Upsample(scale_factor=2),
+
+                                    nn.ConvTranspose2d(64, 32, 3, 1, 1),
+                                    nn.LeakyReLU(negative_slope=0.02),
+                                    nn.Upsample(scale_factor=2),
+
+                                    nn.ConvTranspose2d(32, 1, 3, 1, 1),
+                                    nn.LeakyReLU(negative_slope=0.02))
+
+    def forward(self, x):
+        x1 = self.seqIn(x)
+        x1 = self.seqOut(x1)
+        return x1
+    
+class JuliaCNN100(nn.Module):
+    def __init__(self, dout1=0.4, dout2=0.4, dout3=0.1, dout4=0.1, p1=1.0, p2=1.0):
+        super(JuliaCNN100, self).__init__() #pytorch version of the Julia network
+        self.dout1 = dout1
+        self.dout2 = dout2
+        self.dout3 = dout3
+        self.dout4 = dout4
+        self.p1 = p1
+        self.p2 = p2
+        self.nn1 = nn.Sequential(nn.Conv2d(1, 1, 3, 1, 1),
+                                 nn.Dropout2d(self.dout1),
+                                 nn.BatchNorm2d(1),
+                                 
+                                 nn.Conv2d(1, 1, 3, 1, 1),
+#                                  nn.Dropout2d(self.dout1),
+                                 nn.BatchNorm2d(1),
+                                 
+                                 nn.Conv2d(1, 1, 3, 1, 1),
+#                                  nn.Dropout2d(self.dout1),
+                                 nn.BatchNorm2d(1),
+                                 
+                                 nn.Conv2d(1, 1, 3, 1, 1),
+#                                  nn.Dropout2d(self.dout1),
+                                 nn.BatchNorm2d(1),
+                                 
+                                 nn.Conv2d(1, 1, 3, 1, 1),
+#                                  nn.Dropout2d(self.dout1),
+                                 nn.BatchNorm2d(1),
+                                 
+                                 nn.Conv2d(1, 1, 3, 1, 1),
+                                 nn.Dropout2d(self.dout2),
+                                 nn.BatchNorm2d(1),
+                                )
+        self.seqIn = nn.Sequential(nn.Conv2d(1, 64, 3, 1, 1),
+                                   nn.ReLU(),
+                                   nn.BatchNorm2d(64),
+                                   nn.Dropout2d(self.dout3),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(64, 128, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(128, 256, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(256, 512, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(512, 1024, 3, 1, 1),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(1024, 2048, 3, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+#                                    nn.AvgPool2d(2),
+                                   )
+
+        self.seqOut = nn.Sequential(nn.ConvTranspose2d(2048, 1024, 3, 2, 0),
+                                    nn.LeakyReLU(negative_slope=0.02),
+
+                                    nn.ConvTranspose2d(1024, 512, 3, 2, 0),
+                                    nn.LeakyReLU(negative_slope=0.02),
+#                                     nn.Upsample(scale_factor=2), #6
+
+                                    nn.ConvTranspose2d(512, 256, 3, 2, 1),
+                                    nn.LeakyReLU(negative_slope=0.02),
+#                                     nn.Upsample(scale_factor=2),  #12
+
+                                    nn.ConvTranspose2d(256, 128, 3, 2, 1),
+                                    nn.LeakyReLU(negative_slope=0.02),
+#                                     nn.Upsample(scale_factor=2), #24
+
+#                                     nn.ConvTranspose2d(128, 64, 3, 1, 1),
+                                    nn.ConvTranspose2d(128,64,3,2,0),
+                                    nn.LeakyReLU(negative_slope=0.02),
+#                                     nn.Upsample(scale_factor=2),
+
+                                    nn.Dropout2d(self.dout4),
+                                    nn.ConvTranspose2d(64, 1, 4, 2, 2),
+                                    nn.ReLU(),
+                                    nn.BatchNorm2d(1),
+
+                                   )
+        self.nn2 = nn.Sequential(self.seqIn,
+                                 self.seqOut,        
+                                )
+
+    def forward(self, x):
+        x1 = self.nn1(x)
+        x2 = self.nn2(x)
+        xout = self.p1 * x1 + self.p2 * x2
+        return xout
 
 
 class DNN(nn.Module):
