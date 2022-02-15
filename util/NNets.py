@@ -174,14 +174,14 @@ class SimpleCNN100(nn.Module):
         return x1
     
 class JuliaCNN100(nn.Module):
-    def __init__(self, dout1=0.4, dout2=0.4, dout3=0.1, dout4=0.1, p1=1.0, p2=1.0):
+    def __init__(self, dout1=0.4, dout2=0.4, dout3=0.1, dout4=0.1, p1=0.5):
         super(JuliaCNN100, self).__init__() #pytorch version of the Julia network
         self.dout1 = dout1
         self.dout2 = dout2
         self.dout3 = dout3
         self.dout4 = dout4
         self.p1 = p1
-        self.p2 = p2
+        self.p2 = 1.0 - p1
         self.nn1 = nn.Sequential(nn.Conv2d(1, 1, 3, 1, 1),
                                  nn.LeakyReLU(negative_slope=0.02),
                                  nn.Dropout2d(self.dout1),
@@ -206,7 +206,7 @@ class JuliaCNN100(nn.Module):
                                  nn.Conv2d(1, 1, 3, 1, 1),
                                  nn.ReLU(),
                                  nn.Dropout2d(self.dout2),
-#                                  nn.BatchNorm2d(1),
+                                 nn.BatchNorm2d(1),
                                 )
         self.seqIn = nn.Sequential(nn.Conv2d(1, 64, 3, 1, 1),
                                    nn.ReLU(),
@@ -264,6 +264,10 @@ class JuliaCNN100(nn.Module):
         self.nn2 = nn.Sequential(self.seqIn,
                                  self.seqOut,        
                                 )
+        
+    def updatePs(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
 
     def forward(self, x):
         x1 = self.nn1(x)
