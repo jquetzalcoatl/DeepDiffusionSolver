@@ -171,36 +171,51 @@ def errInSample(data, device, theModel):
 
 @torch.no_grad()    
 def errInDS(neural_net, loader, device, transformation="linear",
-                    error_fnc=nn.L1Loss(reduction='none')):
+                    error_fnc=nn.L1Loss(reduction='none'), tol1 = 0.2, tol2 = 0.1, tol3 = 0.05):
     error1 = 0.0
     
     error1_field = 0.0
     
     error1_src = 0.0
+    error1_ring1 = 0.0
+    error1_ring2 = 0.0
+    error1_ring3 = 0.0
     
     errorMax = 0.0
     
     errorMax_field = 0.0
     
     errorMax_src = 0.0
+    errorMax_ring1 = 0.0
+    errorMax_ring2 = 0.0
+    errorMax_ring3 = 0.0
     
     errorMaxm = 0.0
     
     errorMaxm_field = 0.0
     
     errorMaxm_src = 0.0
+    errorMaxm_ring1 = 0.0
+    errorMaxm_ring2 = 0.0
+    errorMaxm_ring3 = 0.0
     
     errorMin = 0.0
     
     errorMin_field = 0.0
     
     errorMin_src = 0.0
+    errorMin_ring1 = 0.0
+    errorMin_ring2 = 0.0
+    errorMin_ring3 = 0.0
     
     errorMinm = 0.0
     
     errorMinm_field = 0.0
     
     errorMinm_src = 0.0
+    errorMinm_ring1 = 0.0
+    errorMinm_ring2 = 0.0
+    errorMinm_ring3 = 0.0
     
 #     error1_per_im = []
     
@@ -210,13 +225,19 @@ def errInDS(neural_net, loader, device, transformation="linear",
     
     for i, data in enumerate(loader):
         x = data[0].to(device)
+        y = data[1].to(device)
         
         srcs = x > 0
+        rings1 = (y - y * torch.sign(x)) >= tol1
+        rings2 = ( (y - y * torch.sign(x)) >= tol2 ) * ((y - y * torch.sign(x)) < tol1)
+        rings3 = ( (y - y * torch.sign(x)) >= tol3 ) * ((y - y * torch.sign(x)) < tol2)
         
         nan_srcs = torch.where(srcs, float('nan'), 1.0)
         nan_rest = torch.where(srcs, 1.0, float('nan'))
+        nan_notring1 = torch.where(rings1, 1.0, float('nan'))
+        nan_notring2 = torch.where(rings2, 1.0, float('nan'))
+        nan_notring3 = torch.where(rings3, 1.0, float('nan'))
         
-        y = data[1].to(device)
         
         yhat = neural_net(x)
         
@@ -227,44 +248,92 @@ def errInDS(neural_net, loader, device, transformation="linear",
         e1_srcs = nan_rest * e1
         e1_field = nan_srcs * e1
         
+        e1_ring1 = nan_notring1 * e1
+        e1_ring2 = nan_notring2 * e1
+        e1_ring3 = nan_notring3 * e1
         
-        error1 += np.mean(e1.cpu().numpy())
         
-        error1_field += np.nanmean(e1_field.cpu().numpy())
-        error1_src += np.nanmean(e1_srcs.cpu().numpy())
+#         error1 += np.mean(e1.cpu().numpy())
+#         error1_field += np.nanmean(e1_field.cpu().numpy())
+#         error1_src += np.nanmean(e1_srcs.cpu().numpy())
+#         error1_ring1 += np.nanmean(e1_ring1.cpu().numpy())
+#         error1_ring2 += np.nanmean(e1_ring2.cpu().numpy())
+#         error1_ring3 += np.nanmean(e1_ring3.cpu().numpy())
         
-        errorMax = np.maximum(errorMax, np.nanmax(e1.cpu().numpy()))
-        errorMax_field = np.maximum(errorMax_field, np.nanmax(e1_field.cpu().numpy()))
-        errorMax_src = np.maximum(errorMax_src, np.nanmax(e1_srcs.cpu().numpy()))
+#         errorMax = np.maximum(errorMax, np.nanmax(e1.cpu().numpy()))
+#         errorMax_field = np.maximum(errorMax_field, np.nanmax(e1_field.cpu().numpy()))
+#         errorMax_src = np.maximum(errorMax_src, np.nanmax(e1_srcs.cpu().numpy()))
+#         errorMax_ring1 = np.maximum(errorMax_ring1, np.nanmax(e1_ring1.cpu().numpy()))
+#         errorMax_ring2 = np.maximum(errorMax_ring2, np.nanmax(e1_ring2.cpu().numpy()))
+#         errorMax_ring3 = np.maximum(errorMax_ring3, np.nanmax(e1_ring3.cpu().numpy()))
         
-        errorMaxm += np.nanmax(e1.cpu().numpy())
-        errorMaxm_field += np.nanmax(e1_field.cpu().numpy())
-        errorMaxm_src += np.nanmax(e1_srcs.cpu().numpy())
+#         errorMaxm += np.nanmax(e1.cpu().numpy())
+#         errorMaxm_field += np.nanmax(e1_field.cpu().numpy())
+#         errorMaxm_src += np.nanmax(e1_srcs.cpu().numpy())
+#         errorMaxm_ring1 += np.nanmax(e1_ring1.cpu().numpy())
+#         errorMaxm_ring2 += np.nanmax(e1_ring2.cpu().numpy())
+#         errorMaxm_ring3 += np.nanmax(e1_ring3.cpu().numpy())
         
-        errorMin = np.minimum(errorMin, np.nanmin(e1.cpu().numpy()))
-        errorMin_field = np.minimum(errorMin_field, np.nanmin(e1_field.cpu().numpy()))
-        errorMin_src = np.minimum(errorMin_src, np.nanmin(e1_srcs.cpu().numpy()))
+#         errorMin = np.minimum(errorMin, np.nanmin(e1.cpu().numpy()))
+#         errorMin_field = np.minimum(errorMin_field, np.nanmin(e1_field.cpu().numpy()))
+#         errorMin_src = np.minimum(errorMin_src, np.nanmin(e1_srcs.cpu().numpy()))
+#         errorMin_ring1 = np.minimum(errorMin_ring1, np.nanmin(e1_ring1.cpu().numpy()))
+#         errorMin_ring2 = np.minimum(errorMin_ring2, np.nanmin(e1_ring2.cpu().numpy()))
+#         errorMin_ring3 = np.minimum(errorMin_ring3, np.nanmin(e1_ring3.cpu().numpy()))
         
-        errorMinm += np.nanmin(e1.cpu().numpy())
-        errorMinm_field += np.nanmin(e1_field.cpu().numpy())
-        errorMinm_src += np.nanmin(e1_srcs.cpu().numpy())
+#         errorMinm += np.nanmin(e1.cpu().numpy())
+#         errorMinm_field += np.nanmin(e1_field.cpu().numpy())
+#         errorMinm_src += np.nanmin(e1_srcs.cpu().numpy())
+#         errorMinm_ring1 += np.nanmin(e1_ring1.cpu().numpy())
+#         errorMinm_ring2 += np.nanmin(e1_ring2.cpu().numpy())
+#         errorMinm_ring3 += np.nanmin(e1_ring3.cpu().numpy())
+        error1 += torch.mean(e1)
+        error1_field += torch.nanmean(e1_field).cpu().numpy()
+        error1_src += torch.nanmean(e1_srcs).cpu().numpy()
+        error1_ring1 += torch.nanmean(e1_ring1).cpu().numpy()
+        error1_ring2 += torch.nanmean(e1_ring2).cpu().numpy()
+        error1_ring3 += torch.nanmean(e1_ring3).cpu().numpy()
+        
+        errorMax = np.maximum(errorMax, e1[~e1.isnan()].max().cpu().numpy())
+        errorMax_field = np.maximum(errorMax_field, e1_field[~e1_field.isnan()].max().cpu().numpy())
+        errorMax_src = np.maximum(errorMax_src, e1_srcs[~e1_srcs.isnan()].max().cpu().numpy() )
+        errorMax_ring1 = np.maximum(errorMax_ring1, e1_ring1[~e1_ring1.isnan()].max().cpu().numpy())
+        errorMax_ring2 = np.maximum(errorMax_ring2, e1_ring2[~e1_ring2.isnan()].max().cpu().numpy())
+        errorMax_ring3 = np.maximum(errorMax_ring3, e1_ring3[~e1_ring3.isnan()].max().cpu().numpy())
+        
+        errorMaxm += e1[~e1.isnan()].max().cpu().numpy()
+        errorMaxm_field += e1_field[~e1_field.isnan()].max().cpu().numpy()
+        errorMaxm_src += e1_srcs[~e1_srcs.isnan()].max().cpu().numpy()
+        errorMaxm_ring1 += e1_ring1[~e1_ring1.isnan()].max().cpu().numpy()
+        errorMaxm_ring2 += e1_ring2[~e1_ring2.isnan()].max().cpu().numpy()
+        errorMaxm_ring3 += e1_ring3[~e1_ring3.isnan()].max().cpu().numpy()
+        
+        errorMin = np.minimum(errorMin, e1[~e1.isnan()].min().cpu().numpy())
+        errorMin_field = np.minimum(errorMin_field, e1_field[~e1_field.isnan()].min().cpu().numpy())
+        errorMin_src = np.minimum(errorMin_src, e1_srcs[~e1_srcs.isnan()].min().cpu().numpy())
+        errorMin_ring1 = np.minimum(errorMin_ring1, e1_ring1[~e1_ring1.isnan()].min().cpu().numpy())
+        errorMin_ring2 = np.minimum(errorMin_ring2, e1_ring1[~e1_ring2.isnan()].min().cpu().numpy())
+        errorMin_ring3 = np.minimum(errorMin_ring3, e1_ring1[~e1_ring3.isnan()].min().cpu().numpy())
+        
+        errorMinm += e1[~e1.isnan()].min().cpu().numpy()
+        errorMinm_field += e1_field[~e1_field.isnan()].min().cpu().numpy()
+        errorMinm_src += e1_srcs[~e1_srcs.isnan()].min().cpu().numpy()
+        errorMinm_ring1 += e1_ring1[~e1_ring1.isnan()].min().cpu().numpy()
+        errorMinm_ring2 += e1_ring2[~e1_ring2.isnan()].min().cpu().numpy()
+        errorMinm_ring3 += e1_ring3[~e1_ring3.isnan()].min().cpu().numpy()
                 
-#         e1_list =[]        
-#         e1_list_field =[]        
-#         e1_list_src =[]        
-#         for j in range(e1.shape[0]):
-#             e1_list.append(np.mean(e1[j].cpu().numpy()))            
-#             e1_list_field.append(np.nanmean(e1_field[j].cpu().numpy()))            
-#             e1_list_src.append(np.nanmean(e1_srcs[j].cpu().numpy()))                        
-#         error1_per_im.extend(e1_list)        
-#         error1_per_im_field.extend(e1_list_field)       
-#         error1_per_im_src.extend(e1_list_src)
+
         
     return error1/(i+1), error1_field/(i+1),  error1_src/(i+1),  \
             errorMax, errorMax_field, errorMax_src, \
             errorMaxm/(i+1), errorMaxm_field/(i+1), errorMaxm_src/(i+1), \
             errorMin, errorMin_field, errorMin_src, \
-            errorMinm/(i+1), errorMinm_field/(i+1), errorMinm_src/(i+1)
+            errorMinm/(i+1), errorMinm_field/(i+1), errorMinm_src/(i+1), \
+            error1_ring1/(i+1), error1_ring2/(i+1),  error1_ring3/(i+1),  \
+            errorMax_ring1, errorMax_ring2, errorMax_ring3, \
+            errorMaxm_ring1/(i+1), errorMaxm_ring2/(i+1), errorMaxm_ring3/(i+1), \
+            errorMin_ring1, errorMin_ring2, errorMin_ring3, \
+            errorMinm_ring1/(i+1), errorMinm_ring2/(i+1), errorMinm_ring3/(i+1)
 
 
 class tools(object):
