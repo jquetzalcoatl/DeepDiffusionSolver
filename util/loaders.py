@@ -200,17 +200,23 @@ class inOut(object):
         # date = date[:16].replace(':', '-').replace(' ', '-')
         path = PATH + "Models/" + dir + "/"
         os.path.isdir(path) or os.mkdir(path)
-        filename = os.path.join(path, f'{module}-backup.pt')
+        filename = os.path.join(path, f'{module}-{tag}.pt')
         torch.save({
             'epoch'               : epoch,
             'model_state_dict'    : model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss'                : loss,
         }, filename)
-        if len(dict[module]) == 0 or tag != 'backup':
-            dict[module].append(filename)
-        else:
-            dict[module][-1] = filename
+        if tag == 'backup':
+            if len(dict[module]) == 0: # or tag != 'backup'
+                dict[module].append(filename)
+            else:
+                dict[module][-1] = filename
+        elif tag == "Best":
+            if len(dict[module+"-"+tag]) == 0: # or tag != 'backup'
+                dict[module+"-"+tag].append(filename)
+            else:
+                dict[module+"-"+tag][-1] = filename
         dict["Loss"] = loss
         dict["LossTest"] = loss_test
         self.saveDict(dict)
@@ -271,6 +277,7 @@ class inOut(object):
             "Disc"    : [],
             "Enc"     : [],
             "Diff"    : [],
+            "Diff-Best"    : [],
             "Path"    : [path + DICT_NAME],
             "Loss"    : [],
             "LossTest": [],
