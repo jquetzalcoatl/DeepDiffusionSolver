@@ -335,6 +335,7 @@ def errInDS(neural_net, loader, device, transformation="linear",
             errorMin_ring1, errorMin_ring2, errorMin_ring3, \
             errorMinm_ring1/(i+1), errorMinm_ring2/(i+1), errorMinm_ring3/(i+1)
 
+
 @torch.no_grad()    
 def errInDS_2(neural_net, loader, device, transformation="linear",
                     error_fnc=nn.L1Loss(reduction='none'), tol1 = 0.2, tol2 = 0.1, tol3 = 0.05):
@@ -464,6 +465,55 @@ def errInDS_2(neural_net, loader, device, transformation="linear",
             errorMaxm_ring1/(i+1), errorMaxm_ring2/(i+1), errorMaxm_ring3/(i+1), \
             errorMin_ring1, errorMin_ring2, errorMin_ring3, \
             errorMinm_ring1/(i+1), errorMinm_ring2/(i+1), errorMinm_ring3/(i+1)
+
+@torch.no_grad()    
+def numOfPixels(loader, device, transformation="linear",
+                    error_fnc=nn.L1Loss(reduction='none'), tol1 = 0.2, tol2 = 0.1, tol3 = 0.05):
+    error1 = 0.0
+    
+    error1_field = 0.0
+    
+    error1_src = 0.0
+    error1_ring1 = 0.0
+    error1_ring2 = 0.0
+    error1_ring3 = 0.0
+    
+    
+    for i, data in enumerate(loader):
+        x = data[0].to(device)
+        y = data[1].to(device)
+        
+        srcs = x > 0
+        rings1 = (y - y * torch.sign(x)) >= tol1
+        rings2 = ( (y - y * torch.sign(x)) >= tol2 ) * ((y - y * torch.sign(x)) < tol1)
+        rings3 = ( (y - y * torch.sign(x)) >= tol3 ) * ((y - y * torch.sign(x)) < tol2)
+        
+        nan_srcs = torch.where(srcs, float('nan'), 1.0)
+        nan_rest = torch.where(srcs, 1.0, float('nan'))
+        nan_notring1 = torch.where(rings1, 1.0, float('nan'))
+        nan_notring2 = torch.where(rings2, 1.0, float('nan'))
+        nan_notring3 = torch.where(rings3, 1.0, float('nan'))
+        
+        e1_srcs = nan_rest #* e1
+        e1_field = nan_srcs #* e1
+        
+        e1_ring1 = nan_notring1 #* e1
+        e1_ring2 = nan_notring2 #* e1
+        e1_ring3 = nan_notring3 #* e1
+        
+        
+
+        error1 += 512*512/(512*512) #torch.mean(e1).cpu().numpy()
+        error1_field += torch.nansum(e1_field).cpu().numpy()/(512*512)
+        error1_src += torch.nansum(e1_srcs).cpu().numpy()/(512*512)
+        error1_ring1 += torch.nansum(e1_ring1).cpu().numpy()/(512*512)
+        error1_ring2 += torch.nansum(e1_ring2).cpu().numpy()/(512*512)
+        error1_ring3 += torch.nansum(e1_ring3).cpu().numpy()/(512*512)
+                
+
+        
+    return error1/(i+1), error1_field/(i+1),  error1_src/(i+1),  \
+            error1_ring1/(i+1), error1_ring2/(i+1),  error1_ring3/(i+1)
 
 
 class tools(object):

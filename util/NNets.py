@@ -574,10 +574,55 @@ class UNet(nn.Module):
 
         return xfinal
 
+class DiffDisc(nn.Module):
+    def __init__(self):
+        super(DiffDisc, self).__init__()
+        self.seqIn = nn.Sequential(nn.Conv2d(2, 64, 3, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.BatchNorm2d(64),
+                                   nn.Dropout2d(0.1),
+                                   nn.AvgPool2d(2),
 
+                                   nn.Conv2d(64, 128, 3, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(128, 256, 3, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(256, 512, 3, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(512, 1024, 3, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Conv2d(1024, 2048, 3, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+                                   
+                                   nn.Conv2d(2048, 2048, 4, 1, 0),
+                                   nn.LeakyReLU(negative_slope=0.02),
+                                   nn.AvgPool2d(2),
+
+                                   nn.Flatten(),
+
+                                   nn.Linear(2048, 512),
+                                   nn.Linear(512, 1),
+                                   nn.Sigmoid(),
+#                                    nn.LeakyReLU(negative_slope=0.02),
+                                  )  #
+
+    def forward(self, x):
+        x = self.seqIn(x)
+        return x
+    
+    
 class SimpleDisc(nn.Module):
     def __init__(self):
-        super(Disc, self).__init__()
+        super(SimpleDisc, self).__init__()
         self.seqIn = nn.Sequential(nn.Conv2d(1, 64, 3, 1, 1),
                                    nn.LeakyReLU(negative_slope=0.02),
                                    nn.BatchNorm2d(64),

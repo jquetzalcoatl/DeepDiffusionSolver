@@ -20,6 +20,10 @@ datasetDict = {"All" : ["/test.csv", "/train.csv"],
                "AllDouble" : ["/test2:1.csv", "/train2:1.csv"], 
                "AllFourth" : ["/test4:1.csv", "/train4:1.csv"],
                "All1:5" : ["/test1:5.csv", "/train1:5.csv"],
+               "All1:5-2" : ["/test1:5-2.csv", "/train1:5-2.csv"],
+               "All1:5-3" : ["/test1:5-3.csv", "/train1:5-3.csv"],
+               "All1:5-4" : ["/test1:5-4.csv", "/train1:5-4.csv"],
+               "All1:5-5" : ["/test1:5-5.csv", "/train1:5-5.csv"],
                "All1:10" : ["/test1:10.csv", "/train1:10.csv"]}
 
 
