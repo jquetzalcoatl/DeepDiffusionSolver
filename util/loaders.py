@@ -11,11 +11,13 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 
 datasetDict = {"All" : ["/test.csv", "/train.csv"], 
+               "AllSubnew" : ["/testSubNEW.csv", "/trainSubNEW.csv"], 
                "AllSub" : ["/testSub.csv", "/trainSub.csv"], 
                "AllSub2" : ["/testSub-2.csv", "/trainSub-2.csv"], 
                "AllSub3" : ["/testSub-3.csv", "/trainSub-3.csv"], 
                "AllSub4" : ["/testSub-4.csv", "/trainSub-4.csv"], 
                "AllSub5" : ["/testSub-5.csv", "/trainSub-5.csv"], 
+               "AllSubTemp" : ["/testSub.csv", "/trainSubTemp.csv"], 
                "AllHalf" : ["/testHalf.csv", "/trainHalf.csv"], 
                "AllDouble" : ["/test2:1.csv", "/train2:1.csv"], 
                "AllFourth" : ["/test4:1.csv", "/train4:1.csv"],
@@ -256,7 +258,7 @@ class inOut(object):
                 loss = checkpoint['loss']
                 return last_epoch, loss, model
             elif module == "Disc":
-                model = Disc().to(device)
+                model = net #Disc().to(device)
                 checkpoint = torch.load(dict[module][-1])
                 model.load_state_dict(checkpoint['model_state_dict'])
                 # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
